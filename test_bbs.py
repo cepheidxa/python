@@ -2,8 +2,12 @@ import unittest
 import bbs
 from  random import SystemRandom
 from math import sqrt
+import log
+import logging
 
 class Tests(unittest.TestCase):
+    def setUp(self):
+        self._logger = logging.getLogger('test.bbs')
     def run_test_bits(self, r, level):
         """Test based on Norm distribution
             Xi ~ 1, or -1 with equal possibility
@@ -22,8 +26,11 @@ class Tests(unittest.TestCase):
         sigma = 1 / sqrt(n)
         for i in range(n):
             sum = sum + r.getrandbits(1)
-        diff = abs(n - 2 * sum)
-        self.assertEqual(diff/n < level * sigma, True)
+        diff = abs(n - 2 * sum) / n
+        self._logger.debug('diff is {0} sigma'.format(diff/sigma))
+        # 2 sigma , p = 95.45%
+        # 3 sigma , p = 99.73%
+        self.assertEqual(diff < level * sigma, True)
         
     def run_test_avarage(self, r, level):
         """Test based on Norm distribution
@@ -46,9 +53,11 @@ class Tests(unittest.TestCase):
         EXi = N / 2
         EXiXi = (2 * (N + 1) * (N + 2) - 3 * (N + 1))/6
         sigma_avarage = sqrt((EXiXi ** 2 - EX ** 2) / n)
+        diff = abs(sum / n - N / 2)
         # 2 sigma , p = 95.45%
         # 3 sigma , p = 99.73%
-        self.assertEqual(abs(sum / n - N / 2) < level * sigma_avarage, True)
+        self._logger.debug('diff is {0} sigma'.format(diff/sigma))
+        self.assertEqual(diff < level * sigma_avarage, True)
     def test_BBS256(self):
         #self.run_test_avarage(bbs.BBS256(), 3)
         self.run_test_bits(bbs.BBS256(), 3)

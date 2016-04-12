@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import prime
+import logging
 
 """Test ECC curve in ECC cryption algorithm."""
 
@@ -59,9 +60,15 @@ class ECC:
         self._a = a
         self._b = b
         self._p = p
+        self._logger = logging.getLogger('test.ecc')
+        self._logger.debug('a = {0} b = {1} p = {2}'.format(a, b, p))
+        self._G = None
     @property
     def G(self):
-        return self.basePoint()
+        if not self._G:
+            return self.basePoint()
+        else:
+            return self._G
     @G.setter
     def G(self, value):
         pass
@@ -82,9 +89,11 @@ class ECC:
                 r.x = r.x + self._p
             if r.y < 0:
                 r.y = r.y + self._p
-        elif p.y + q.y == self._p:
+        elif (p.y + q.y) % self._p == 0:
             r = ZeroPoint()
         else:
+            if p.y == 0:
+                p, q = q, p
             s = (3 * p.x * p.x - self._a) * prime.invP(2 * p.y, self._p)
             r.x = (s ** 2 - 2 * p.x) % self._p
             r.y = ((p.y + s * (r.x - p.x)) * -1) % self._p

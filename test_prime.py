@@ -4,16 +4,16 @@ import prime
 
 class Tests(unittest.TestCase):
     def test_isPrime(self):
-        self.assertEqual(prime.isPrime(2), True)
-        self.assertEqual(prime.isPrime(3), True)
-        self.assertEqual(prime.isPrime(4), False)
-        self.assertEqual(prime.isPrime(49), False)
-        self.assertEqual(prime.isPrime(179426547), False)
-        self.assertEqual(prime.isPrime(179426549), True)
+        self.assertTrue(prime.isPrime(2))
+        self.assertTrue(prime.isPrime(3))
+        self.assertFalse(prime.isPrime(4))
+        self.assertFalse(prime.isPrime(49))
+        self.assertFalse(prime.isPrime(179426547))
+        self.assertTrue(prime.isPrime(179426549))
     def test_getRandPrime(self):
         for i in range(100):
             n = prime.getRandPrime(10 + i)
-            self.assertEqual(prime.isPrime(n), True)
+            self.assertTrue(prime.isPrime(n))
     def test_invP(self):
         r = random.SystemRandom()
         for p in [prime.getRandPrime(10 + i) for i in range(10)]:
