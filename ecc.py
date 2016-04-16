@@ -61,7 +61,6 @@ class ECC:
         self._b = b
         self._p = p
         self._logger = logging.getLogger('test.ecc')
-        self._logger.debug('a = {0} b = {1} p = {2}'.format(a, b, p))
         self._G = None
     @property
     def G(self):
@@ -82,7 +81,7 @@ class ECC:
         elif isinstance(q, ZeroPoint):
             r = p
         elif p.x != q.x:
-            s = (p.y - q.y) * prime.invP(p.x - q.x, self._p)
+            s = (p.y - q.y) * prime.inv(p.x - q.x, self._p)
             r.x = (s ** 2 - p.x - q.x) % self._p
             r.y = ((p.y + s * (r.x - p.x)) * -1) % self._p
             if r.x < 0:
@@ -94,7 +93,7 @@ class ECC:
         else:
             if p.y == 0:
                 p, q = q, p
-            s = (3 * p.x * p.x - self._a) * prime.invP(2 * p.y, self._p)
+            s = (3 * p.x * p.x - self._a) * prime.inv(2 * p.y, self._p)
             r.x = (s ** 2 - 2 * p.x) % self._p
             r.y = ((p.y + s * (r.x - p.x)) * -1) % self._p
             if r.x < 0:
@@ -104,20 +103,21 @@ class ECC:
         return r
     def listPointGenerator(self):
         for i in range(self._p):
-            for j in range(self._p):
                 y2 = (i ** 3 - self._a * i  - self._b) % self._p
-                if(j ** 2) % self._p == y2:
-                    p = Point(i, j)
+                y = prime.sqrtmod(y2, self._p)
+                if y:
+                    p = Point(i, y)
+                    yield p
+                    p = Point(i, self._p - y)
                     yield p
     def basePoint(self, start = None):
         if not start:
             start = self._p // 2
         for i in range(start, self._p):
-            for j in range(self._p):
                 y2 = (i ** 3 - self._a * i  - self._b) % self._p
-                if(j ** 2) % self._p == y2:
-                    p = Point(i, j)
-                    return p
+                y = prime.sqrtmod(y2, self._p)
+                if y:
+                    return Point(i, y)
         return None
     def isInCurve(self, point):
         if isinstance(point, ZeroPoint):

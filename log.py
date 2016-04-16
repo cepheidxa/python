@@ -4,7 +4,7 @@ import logging
 import logging.handlers
 
 logger = logging.getLogger('test')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 handler = logging.handlers.RotatingFileHandler('test.log', maxBytes = 1024 * 1024, backupCount = 5)
 
