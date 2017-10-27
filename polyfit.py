@@ -29,7 +29,7 @@ class PolyFit:
     def predict(self, x):
         if isinstance(x, list):
             return self.polyfunc(x, self.__coeffs)
-        elif isinstance(x, int):
+        else:
             return self.__polyfunc_one(x, self.__coeffs)
     def plot(self, node = 10000):
         minx = min(self.__x)
@@ -53,6 +53,8 @@ class PolyFit:
         print(''.join(ret))
 
 class _Test(unittest.TestCase):
+    def setUp(self):
+        self.__static_PolyFit = PolyFit([1], [1], 1)
     def test_fit(self):
         x = list(range(100))
         y = list(range(100))
@@ -64,6 +66,18 @@ class _Test(unittest.TestCase):
         solv = PolyFit(x, y, 5)
         for i in range(len(x)):
             self.assertTrue(abs(solv.predict(x[i]) - y[i]) < 0.0001)
+    def test_fit_random(self):
+        for i in range(100):
+            degree = random.randint(2, 4)
+            datalen = random.randint(50, 100)
+            x = list(np.random.random(datalen) * 100)
+            coeffs = np.random.random(degree+1)
+            y = list(self.__static_PolyFit.polyfunc(x, coeffs))
+            solv = PolyFit(x, y, degree)
+            fity = solv.predict(x)
+            for j in range(len(x)):
+                self.assertTrue(abs(fity[j]-y[j]) < 0.0001)
+                self.assertTrue(abs(solv.predict(x[j])-y[j]) < 0.01)
     
 if __name__ == '__main__':
     unittest.main()
