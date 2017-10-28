@@ -1,83 +1,69 @@
 #!/usr/bin/env python3
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import optimize
-import itertools
-import math
 import random
 import unittest
 
 class PolyFit:
     def __init__(self, x, y, degree):
-        if not isinstance(x, list) or not isinstance(y, list):
-            raise ValueError('x and y should be a list')
         self.__x = x
         self.__y = y
         self.__degree = degree
         self.__coeffs = np.polyfit(self.__x, self.__y, self.__degree)
-    def __polyfunc_one(self, x, coeffs):
-        ret = 0
-        degree = len(coeffs)
-        for i in range(degree):
-            ret += coeffs[i] * math.pow(x, degree -1 - i)
-        return ret
-    def polyfunc(self, x, coeffs):
-        ret = []
-        for element in x:
-            ret.append(self.__polyfunc_one(element, coeffs))
-        return ret
+        self.__p = np.poly1d(self.__coeffs)
     def predict(self, x):
-        if isinstance(x, list):
-            return self.polyfunc(x, self.__coeffs)
-        else:
-            return self.__polyfunc_one(x, self.__coeffs)
+        return self.__p(x)
     def plot(self, node = 10000):
-        minx = min(self.__x)
-        maxx = max(self.__x)
-        step = (maxx - minx) / node
-        x1 = np.arange(minx, maxx, step)
-        fity = self.polyfunc(x1, self.__coeffs)
-        plt.plot(self.__x, self.__y, 'o')
-        plt.plot(x1, fity)
+        xp = np.linspace(np.min(self.__x), np.max(self.__x), node)
+        plt.plot(self.__x, self.__y, 'o', xp, self.__p(xp),'-')
         plt.show()
     def printfunc(self):
         ret = []
         for i in range(self.__degree + 1):
-            if i != 0:
+            if i != 0 and i != 1:
                 if self.__coeffs[self.__degree - i] > 0:
                     ret.append('+%f*x^%d'%(self.__coeffs[self.__degree - i], i))
                 else:
                     ret.append('%f*x^%d'%(self.__coeffs[self.__degree - i], i))
+            elif i == 1:
+                if self.__coeffs[self.__degree - i] > 0:
+                    ret.append('+%f*x'%(self.__coeffs[self.__degree - i]))
+                else:
+                    ret.append('%f*x'%(self.__coeffs[self.__degree - i]))
             else:
                 ret.append('%f'%(self.__coeffs[self.__degree - i]))
+                
         print(''.join(ret))
 
 class _Test(unittest.TestCase):
-    def setUp(self):
-        self.__static_PolyFit = PolyFit([1], [1], 1)
     def test_fit(self):
         x = list(range(100))
         y = list(range(100))
         solv = PolyFit(x, y, 5)
-        for i in range(len(x)):
-            self.assertTrue(abs(solv.predict(x[i]) - y[i]) < 0.0001)
-
-        y = solv.polyfunc(x, [2,3,2])
-        solv = PolyFit(x, y, 5)
-        for i in range(len(x)):
-            self.assertTrue(abs(solv.predict(x[i]) - y[i]) < 0.0001)
-    def test_fit_random(self):
-        for i in range(100):
+        self.assertTrue(max(np.abs(solv.predict(x) - y)) < 0.0001)
+    def test_fit_without_residuals(self):
+        for i in range(10):
             degree = random.randint(2, 4)
             datalen = random.randint(50, 100)
-            x = list(np.random.random(datalen) * 100)
+            x = list(np.random.random(datalen) * 10)
             coeffs = np.random.random(degree+1)
-            y = list(self.__static_PolyFit.polyfunc(x, coeffs))
+            p = np.poly1d(coeffs)
+            y = p(x)
             solv = PolyFit(x, y, degree)
-            fity = solv.predict(x)
-            for j in range(len(x)):
-                self.assertTrue(abs(fity[j]-y[j]) < 0.0001)
-                self.assertTrue(abs(solv.predict(x[j])-y[j]) < 0.01)
-    
+            solv.printfunc()
+            self.assertTrue(max(np.abs(solv.predict(x) - y)) < 0.001)
+    def test_fit_with_residuals(self):
+        for i in range(10):
+            degree = random.randint(2, 4)
+            datalen = random.randint(50, 100)
+            x = list(np.random.random(datalen) * 10)
+            coeffs = np.random.random(degree+1)
+            p = np.poly1d(coeffs)
+            residuals = np.random.random(datalen)*10 - 5
+            y = p(x) + residuals
+            solv = PolyFit(x, y, degree)
+            solv.printfunc()
+            #solv.plot(1000)
+            self.assertTrue(max(np.abs(solv.predict(x) - y)) < np.max(np.abs(residuals)) * 1.5)
 if __name__ == '__main__':
     unittest.main()
