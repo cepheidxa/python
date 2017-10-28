@@ -20,5 +20,4 @@ plt.plot(x, y, 'o', x, func(x, *popt), '-')
 plt.show()
 
 if __name__ == '__main__':
-    #unittest.main()
     pass
