@@ -18,23 +18,7 @@ class PolyFit:
         plt.plot(self.__x, self.__y, 'o', xp, self.__p(xp),'-')
         plt.show()
     def printfunc(self):
-        ret = []
-        for i in range(self.__degree + 1):
-            if i != 0 and i != 1:
-                if self.__coeffs[self.__degree - i] > 0:
-                    ret.append('+%f*x^%d'%(self.__coeffs[self.__degree - i], i))
-                else:
-                    ret.append('%f*x^%d'%(self.__coeffs[self.__degree - i], i))
-            elif i == 1:
-                if self.__coeffs[self.__degree - i] > 0:
-                    ret.append('+%f*x'%(self.__coeffs[self.__degree - i]))
-                else:
-                    ret.append('%f*x'%(self.__coeffs[self.__degree - i]))
-            else:
-                ret.append('%f'%(self.__coeffs[self.__degree - i]))
-                
-        print(''.join(ret))
-
+        print(self.__p)
 class _Test(unittest.TestCase):
     def test_fit(self):
         x = list(range(100))
