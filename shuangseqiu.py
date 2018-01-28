@@ -2,12 +2,13 @@
 
 import time
 import random
+from argparse import ArgumentParser
 
 class ShuangSeQiu:
     def __init__(self, order = None):
         self.__r = random.SystemRandom()
         if not order:
-            self.__order = 1
+            self.__order = 0
         else:
             self.__order = order
     def randint(self, min, max):
@@ -21,7 +22,7 @@ class ShuangSeQiu:
             curr = time.time()
             r += self.__r.getrandbits(8)
             r %= length
-        return r
+        return r + 1
     def randRed(self):
         return self.randint(1, 32)
     def randBlue(self):
@@ -34,6 +35,9 @@ class ShuangSeQiu:
         return (sorted(red), blue)
             
 if __name__ == "__main__":
-    a = ShuangSeQiu(300)
+    parser = ArgumentParser(description = "Generate shuangseqiu result.")
+    parser.add_argument("-t", type = int, metavar= "order", help = "The time order", default = 0)
+    command = parser.parse_args()
+    a = ShuangSeQiu(2 ** command.t)
     for i in range(2):
         print(a.cast())
